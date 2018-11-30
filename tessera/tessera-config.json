@@ -1,0 +1,57 @@
+{
+    "useWhiteList": false,
+    "jdbc": {
+        "username": "sa",
+        "password": "",
+        "url": "jdbc:h2:~/tessera/db;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=0"
+    },
+    "server": {
+        "port": TESSERA_PORT,
+        "hostName": "http://TESSERASERVCIENAME",
+        "sslConfig": {
+            "tls": "OFF",
+            "generateKeyStoreIfNotExisted": true,
+            "serverKeyStore": "~/tessera/server1-keystore",
+            "serverKeyStorePassword": "quorum",
+            "serverTrustStore": "~/tessera/server-truststore",
+            "serverTrustStorePassword": "quorum",
+            "serverTrustMode": "TOFU",
+            "knownClientsFile": "~/tessera/knownClients",
+            "clientKeyStore": "~/tessera/client1-keystore",
+            "clientKeyStorePassword": "quorum",
+            "clientTrustStore": "~/tessera/client-truststore",
+            "clientTrustStorePassword": "quorum",
+            "clientTrustMode": "TOFU",
+            "knownServersFile": "~/tessera/knownServers"
+        }
+    },
+    "peer": [
+        {
+            "url": "http://TESSERASERVCIENAME_PORT1"
+        },
+        {
+            "url": "http://TESSERASERVCIENAME_PORT2"
+        },
+        {
+            "url": "http://TESSERASERVCIENAME_PORT3"
+        },
+        {
+            "url": "http://TESSERASERVCIENAME_PORT4"
+        },
+        {
+            "url": "http://TESSERASERVCIENAME_PORT5"
+ 
+        }
+    ],
+    "keys": {
+        "passwords": [],
+        "keyData": [
+            {
+                "privateKeyPath": "~/tessera/tm.key",
+                "publicKeyPath": "~/tessera/tm.pub"
+            }
+        ]
+    },
+    "alwaysSendTo": [],
+    "unixSocketFile": "~/DDIR/tm.ipc"
+}

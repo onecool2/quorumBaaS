@@ -1,0 +1,10 @@
+# Create docker image with only distribution jar
+FROM openjdk:8-jre-alpine
+
+COPY tessera-app/target/tessera-app-0.7-SNAPSHOT-app.jar /tessera/tessera-app.jar
+
+
+COPY tessera.sh /usr/local/bin
+
+CMD /usr/local/bin/tessera.sh
+#ENTRYPOINT ["java", "-jar", "/tessera/tessera-app.jar"]
