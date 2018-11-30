@@ -7,4 +7,5 @@ COPY ./build/bin/* /usr/local/bin/
 
 COPY geth.sh /usr/local/bin/geth.sh
 EXPOSE 8545 8546 30303 30303/udp
+CMD geth.sh
 #ENTRYPOINT ["geth.sh"]

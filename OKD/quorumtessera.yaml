@@ -1,20 +1,32 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: "quorum-tessera template"
+  name: "quorum-tessera"
 message: "quorum-tessera message"
 objects:
 
-#- apiVersion: "v1"
-#  kind: "PersistentVolumeClaim"
-#  metadata:
-#    name: "system-storage"
-#  spec:
-#    accessModes:
-#    - "ReadWriteMany"
-#    resources:
-#      requests:
-#        storage: "100Mi"
+- apiVersion: "v1"
+  kind: "PersistentVolumeClaim"
+  metadata:
+    name: "quorumsharestoragepvc"
+  spec:
+    accessModes:
+    - "ReadWriteMany"
+    resources:
+      requests:
+        storage: "100Mi"
+
+- apiVersion: "v1"
+  kind: "PersistentVolumeClaim"
+  metadata:
+    name: "tesserasharestoragepvc"
+  spec:
+    accessModes:
+    - "ReadWriteMany"
+    resources:
+      requests:
+        storage: "100Mi"
+
 
 - apiVersion: v1
   kind: Service
@@ -22,10 +34,10 @@ objects:
     name: "tessera-service${NODE_ID}"
   spec:
     ports:
-    - port: "${TESSERA_PORT}"
+    - port: ${{TESSERA_PORT}}
       protocol: TCP
-      targetPort: "${TESSERA_PORT}"
-      name: TESSERA_PORT
+      targetPort: ${{TESSERA_PORT}}
+      name: tessera-port
     selector:
       name: quorum-tessera
 
@@ -35,10 +47,10 @@ objects:
     name: "quorum-rpc-service${NODE_ID}"
   spec:
     ports:
-    - port: "${RPC_PORT}"
+    - port: ${{RPC_PORT}}
       protocol: TCP
-      targetPort: "${RPC_PORT}"
-      name: RPC_PORT
+      targetPort: ${{RPC_PORT}}
+      name: rpc-port
     selector:
       name: quorum-tessera
 
@@ -48,10 +60,10 @@ objects:
     name: "quorum-p2p-service${NODE_ID}"
   spec:
     ports:
-    - port: "${P2P_PORT}"
+    - port: ${{P2P_PORT}}
       protocol: UDP
-      targetPort: "${P2P_PORT}"
-      name: P2P_PORT
+      targetPort: ${{P2P_PORT}}
+      name: p2p-port
     selector:
       name: quorum-tessera
 
@@ -62,7 +74,7 @@ objects:
   spec:
     replicas: 1
     selector:
-      name: system-sphinx
+      name: quorum-tessera
     strategy:
       rollingParams:
         intervalSeconds: 1
@@ -79,12 +91,20 @@ objects:
         volumes:
         - name: tesserasocket
           emptyDir: {}
+        - name: quorumsharestorage
+          persistentVolumeClaim:
+            claimName: quorumsharestoragepvc
+        - name: tesserasharestorage
+          persistentVolumeClaim:
+            claimName: tesserasharestoragepvc
         containers:
 ########################### tessera  pod #######################################
         - name: tessera
           volumeMounts:
           - name: tesserasocket 
             mountPath: "${DDIR}"
+          - name: tesserasharestorage 
+            mountPath: /shareStorage
           env:
           - name: LAUNCH_TESSERA_PARAMETERS
             value: "${LAUNCH_TESSERA_PARAMETERS}"
@@ -103,8 +123,8 @@ objects:
           image: baas.reg.2.14/library/tessera:0.7.3
           imagePullPolicy: IfNotPresent
           ports: 
-            - name: TESSERA_PORT
-              containerPort: "${TESSERA_PORT}" 
+            - name: tessera-port
+              containerPort: "${{TESSERA_PORT}}" 
           livenessProbe:
             tcpSocket:
               port: te
@@ -115,6 +135,8 @@ objects:
           volumeMounts:
           - name: tesserasocket
             mountPath: "${DDIR}"
+          - name: quorumsharestorage
+            mountPath: /shareStorage
           env:
           - name: LAUNCH_GETH_PARAMETERS
             value: "${LAUNCH_GETH_PARAMETERS}"
@@ -125,15 +147,15 @@ objects:
           image: baas.reg.2.14/library/quorum:2.1.1
           imagePullPolicy: IfNotPresent
           ports:
-            - name: P2P_PORT
-              containerPort: "${P2P_PORT}" 
+            - name: p2p-port
+              containerPort: ${{P2P_PORT}}
               protocol: UDP
-            - name: RPC_PORT
-              containerPort: "${RPC_PORT}" 
+            - name: rpc-port
+              containerPort: ${{RPC_PORT}}
               protocol: TCP
           livenessProbe:
             tcpSocket:
-              port: "${RPC_PORT}"
+              port: ${{RPC_PORT}}
             initialDelaySeconds: 60
             periodSeconds: 10
     triggers:
