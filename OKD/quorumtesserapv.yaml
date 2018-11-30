@@ -9,6 +9,6 @@ spec:
     - ReadWriteMany 
   persistentVolumeReclaimPolicy: Retain 
   nfs: 
-    path: /opt/nfs 
+    path: /nfs/share 
     server: centos7-2-15 
     readOnly: false

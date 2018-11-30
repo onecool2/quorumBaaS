@@ -4,7 +4,7 @@ FROM centos:latest
 
 #RUN apk add --no-cache ca-certificates
 COPY ./build/bin/* /usr/local/bin/
-
+RUN mkdir -p /tesserasocket
 COPY geth.sh /usr/local/bin/geth.sh
 EXPOSE 8545 8546 30303 30303/udp
 CMD geth.sh

@@ -5,16 +5,16 @@ metadata:
 message: "quorum-tessera message"
 objects:
 
-- apiVersion: "v1"
-  kind: "PersistentVolumeClaim"
-  metadata:
-    name: "quorumsharestoragepvc"
-  spec:
-    accessModes:
-    - "ReadWriteMany"
-    resources:
-      requests:
-        storage: "100Mi"
+#- apiVersion: "v1"
+#  kind: "PersistentVolumeClaim"
+#  metadata:
+#    name: "quorumsharestoragepvc"
+#  spec:
+#    accessModes:
+#    - "ReadWriteMany"
+#    resources:
+#      requests:
+#        storage: "100Mi"
 
 - apiVersion: "v1"
   kind: "PersistentVolumeClaim"
@@ -26,7 +26,6 @@ objects:
     resources:
       requests:
         storage: "100Mi"
-
 
 - apiVersion: v1
   kind: Service
@@ -93,7 +92,7 @@ objects:
           emptyDir: {}
         - name: quorumsharestorage
           persistentVolumeClaim:
-            claimName: quorumsharestoragepvc
+            claimName: tesserasharestoragepvc
         - name: tesserasharestorage
           persistentVolumeClaim:
             claimName: tesserasharestoragepvc
@@ -121,7 +120,7 @@ objects:
           - name: TESSERA_PORT
             value: "${TESSERA_PORT}"
           image: baas.reg.2.14/library/tessera:0.7.3
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports: 
             - name: tessera-port
               containerPort: "${{TESSERA_PORT}}" 
@@ -145,7 +144,7 @@ objects:
           - name: NODE_ID
             value: "${NODE_ID}"
           image: baas.reg.2.14/library/quorum:2.1.1
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: p2p-port
               containerPort: ${{P2P_PORT}}
