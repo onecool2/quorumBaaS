@@ -3,11 +3,11 @@
     "jdbc": {
         "username": "sa",
         "password": "",
-        "url": "jdbc:h2:TESSERADIR/db;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=0"
+        "url": "jdbc:h2:/root/tessera/db;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=0"
     },
     "server": {
         "port": TESSERA_PORT,
-        "hostName": "http://TESSERASERVCIENAME",
+        "hostName": "http://TESSERASERVICENAME",
         "sslConfig": {
             "tls": "OFF",
             "generateKeyStoreIfNotExisted": true,
@@ -34,11 +34,11 @@
         "passwords": [],
         "keyData": [
             {
-                "privateKeyPath": "TESSERADIR/tm.key",
-                "publicKeyPath": "TESSERADIR/tm.pub"
+                "privateKeyPath": "/root/tessera/tm.key",
+                "publicKeyPath": "/root/tessera/tm.pub"
             }
         ]
     },
     "alwaysSendTo": [],
-    "unixSocketFile": "DDIR/tm.ipc"
+    "unixSocketFile": "/tesserasocket/tm.ipc"
 }

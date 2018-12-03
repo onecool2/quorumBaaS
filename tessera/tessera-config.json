@@ -53,5 +53,5 @@
         ]
     },
     "alwaysSendTo": [],
-    "unixSocketFile": "~/DDIR/tm.ipc"
+    "unixSocketFile": "DDIR/tm.ipc"
 }

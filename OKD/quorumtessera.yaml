@@ -5,17 +5,6 @@ metadata:
 message: "quorum-tessera message"
 objects:
 
-#- apiVersion: "v1"
-#  kind: "PersistentVolumeClaim"
-#  metadata:
-#    name: "quorumsharestoragepvc"
-#  spec:
-#    accessModes:
-#    - "ReadWriteMany"
-#    resources:
-#      requests:
-#        storage: "100Mi"
-
 - apiVersion: "v1"
   kind: "PersistentVolumeClaim"
   metadata:
@@ -69,7 +58,7 @@ objects:
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    name: quorum-tessera
+    name: "quorum-tessera${NODE_ID}"
   spec:
     replicas: 1
     selector:
@@ -90,9 +79,9 @@ objects:
         volumes:
         - name: tesserasocket
           emptyDir: {}
-        - name: quorumsharestorage
-          persistentVolumeClaim:
-            claimName: tesserasharestoragepvc
+#        - name: quorumsharestorage
+#          persistentVolumeClaim:
+#            claimName: tesserasharestoragepvc
         - name: tesserasharestorage
           persistentVolumeClaim:
             claimName: tesserasharestoragepvc
@@ -104,6 +93,8 @@ objects:
             mountPath: "${DDIR}"
           - name: tesserasharestorage 
             mountPath: /shareStorage
+          securityContext:
+            runAsUser: 0
           env:
           - name: LAUNCH_TESSERA_PARAMETERS
             value: "${LAUNCH_TESSERA_PARAMETERS}"
@@ -115,34 +106,42 @@ objects:
             value: "${DDIR}"
           - name: DEBUG
             value: "${DEBUG}"
-          - name: TESSERASERVCIENAME
+          - name: TESSERASERVICENAME
             value: "tessera-service${NODE_ID}"
           - name: TESSERA_PORT
             value: "${TESSERA_PORT}"
+          - name: TESSERADIR
+            value: "{TESSERADIR}"
           image: baas.reg.2.14/library/tessera:0.7.3
           imagePullPolicy: Always
           ports: 
             - name: tessera-port
-              containerPort: "${{TESSERA_PORT}}" 
-          livenessProbe:
-            tcpSocket:
-              port: te
-            initialDelaySeconds: 60
-            periodSeconds: 10
-########################### quorum pod #######################################
+              containerPort: ${{TESSERA_PORT}}
+      #    livenessProbe:
+      #      tcpSocket:
+      #        port: tessera-port
+      #      initialDelaySeconds: 60
+      #      periodSeconds: 10
+########################## quorum pod #######################################
         - name: quorum
           volumeMounts:
           - name: tesserasocket
             mountPath: "${DDIR}"
-          - name: quorumsharestorage
+          - name: tesserasharestorage
             mountPath: /shareStorage
+          securityContext:
+            runAsUser: 0
           env:
           - name: LAUNCH_GETH_PARAMETERS
             value: "${LAUNCH_GETH_PARAMETERS}"
           - name: NETWORK_ID
-            value: "${NETWORD_ID}"
+            value: "${NETWORK_ID}"
           - name: NODE_ID
             value: "${NODE_ID}"
+          - name: RPC_PORT
+            value: "${RPC_PORT}"
+          - name: P2P_PORT
+            value: "${P2P_PORT}"
           image: baas.reg.2.14/library/quorum:2.1.1
           imagePullPolicy: Always
           ports:
@@ -152,11 +151,11 @@ objects:
             - name: rpc-port
               containerPort: ${{RPC_PORT}}
               protocol: TCP
-          livenessProbe:
-            tcpSocket:
-              port: ${{RPC_PORT}}
-            initialDelaySeconds: 60
-            periodSeconds: 10
+          #livenessProbe:
+          #  tcpSocket:
+          #    port: ${{RPC_PORT}}
+          #  initialDelaySeconds: 60
+          #  periodSeconds: 10
     triggers:
     - type: ConfigChange
 
@@ -169,7 +168,7 @@ parameters:
 - name: NODE_ID
   displayName: NODE_ID
   description: NODE_ID should be increased
-  value: "0"
+  value: "1"
 - name: NETWORK_ID
   displayName: NETWORK_ID
   description: NETWORK_ID
@@ -204,28 +203,3 @@ parameters:
   displayName: TESSERA_PORT
   description: TESSERA_PORT should be increased
   value: "9000"
-#kind: Pod
-#metadata:
-#    name: datagrand
-#    namespace: test
-#spec:
-#    containers:
-#    - name: test1
-#        image: nginx:1.7.9
-#        volumeMounts:
-#        - name: log-storage
-#            mountPath: /usr/share/nginx/html
-#    - name: test2
-#        image: centos
-#        volumeMounts:
-#        - name: log-storage
-#            mountPath: /html
-#        command: ["/bin/sh","-c"]
-#        args:
-#            - while true;do
-#                    data >> /html/index.html;
-#                    sleep 1;
-#                done
-#volumes:
-#    - name: log-storage
-#        emptyDir: {}
