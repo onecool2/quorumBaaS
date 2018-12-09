@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: initjob
+spec:
+  template:
+    metadata:
+      name: initjob
+    spec:
+      containers:
+      - name: initjob
+        image: baas.reg.2.14/library/initjob:latest
+      #command:
+      #- "/opt/manageiq/container-scripts/backup_db"
+        securityContext:
+          runAsUser: 0
+        env:
+        - name: nodeNumber
+          value: "3"
+        - name: password
+          value: "abc"
+        volumeMounts:
+        - name: tesserasharestorage
+          mountPath: /shareStorage
+      volumes:
+      - name: tesserasharestorage
+        persistentVolumeClaim:
+          claimName: tesserasharestoragepvc
+      restartPolicy: Never

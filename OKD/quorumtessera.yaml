@@ -5,17 +5,6 @@ metadata:
 message: "quorum-tessera message"
 objects:
 
-- apiVersion: "v1"
-  kind: "PersistentVolumeClaim"
-  metadata:
-    name: "tesserasharestoragepvc"
-  spec:
-    accessModes:
-    - "ReadWriteMany"
-    resources:
-      requests:
-        storage: "100Mi"
-
 - apiVersion: v1
   kind: Service
   metadata:
@@ -49,7 +38,7 @@ objects:
   spec:
     ports:
     - port: ${{P2P_PORT}}
-      protocol: UDP
+      protocol: TCP
       targetPort: ${{P2P_PORT}}
       name: p2p-port
     selector:
@@ -147,7 +136,7 @@ objects:
           ports:
             - name: p2p-port
               containerPort: ${{P2P_PORT}}
-              protocol: UDP
+              protocol: TCP
             - name: rpc-port
               containerPort: ${{RPC_PORT}}
               protocol: TCP
@@ -168,7 +157,7 @@ parameters:
 - name: NODE_ID
   displayName: NODE_ID
   description: NODE_ID should be increased
-  value: "1"
+  value: "0"
 - name: NETWORK_ID
   displayName: NETWORK_ID
   description: NETWORK_ID
