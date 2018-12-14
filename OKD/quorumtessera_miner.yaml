@@ -1,0 +1,184 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: "quorum-tessera"
+message: "quorum-tessera message"
+objects:
+#################### SVC ############################
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: "tessera-service${NODE_ID}"
+  spec:
+    ports:
+    - port: ${{TESSERA_PORT}}
+      protocol: TCP
+      targetPort: ${{TESSERA_PORT}}
+      name: tessera-port
+    selector:
+      name: quorum-tessera${NODE_ID}
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: "quorum-p2p-service${NODE_ID}"
+  spec:
+    ports:
+    - port: ${{P2P_PORT}}
+      protocol: TCP
+      targetPort: ${{P2P_PORT}}
+      name: p2p-port
+    selector:
+      name: quorum-tessera${NODE_ID}
+
+#################### DC ############################
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: "quorum-tessera${NODE_ID}"
+  spec:
+    replicas: 1
+    selector:
+      name: quorum-tessera${NODE_ID}
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: quorum-tessera${NODE_ID}
+      spec:
+        volumes:
+        - name: tesserasocket
+          emptyDir: {}
+#        - name: quorumsharestorage
+#          persistentVolumeClaim:
+#            claimName: tesserasharestoragepvc
+        - name: tesserasharestorage
+          persistentVolumeClaim:
+            claimName: sharestoragepvc
+        containers:
+########################### tessera  pod #######################################
+        - name: tessera
+          volumeMounts:
+          - name: tesserasocket 
+            mountPath: "${DDIR}"
+          - name: tesserasharestorage 
+            mountPath: /shareStorage
+          securityContext:
+            runAsUser: 0
+          env:
+          - name: LAUNCH_TESSERA_PARAMETERS
+            value: "${LAUNCH_TESSERA_PARAMETERS}"
+          - name: NODE_ID
+            value: "${NODE_ID}"
+          - name: MEMORY
+            value: "${MEMORY}" 
+          - name: DDIR
+            value: "${DDIR}"
+          - name: DEBUG
+            value: "${DEBUG}"
+          - name: TESSERASERVICENAME
+            value: "tessera-service${NODE_ID}"
+          - name: TESSERA_PORT
+            value: "${TESSERA_PORT}"
+          - name: TESSERADIR
+            value: "{TESSERADIR}"
+          image: baas.reg.2.14/library/tessera:0.7.3
+          imagePullPolicy: Always
+          ports: 
+            - name: tessera-port
+              containerPort: ${{TESSERA_PORT}}
+      #    livenessProbe:
+      #      tcpSocket:
+      #        port: tessera-port
+      #      initialDelaySeconds: 60
+      #      periodSeconds: 10
+########################## quorum pod #######################################
+        - name: quorum
+          volumeMounts:
+          - name: tesserasocket
+            mountPath: "${DDIR}"
+          - name: tesserasharestorage
+            mountPath: /shareStorage
+          securityContext:
+            runAsUser: 0
+          env:
+          - name: LAUNCH_GETH_PARAMETERS
+            value: "${LAUNCH_GETH_PARAMETERS}"
+          - name: NETWORK_ID
+            value: "${NETWORK_ID}"
+          - name: NODE_ID
+            value: "${NODE_ID}"
+          - name: RPC_PORT
+            value: "${RPC_PORT}"
+          - name: P2P_PORT
+            value: "${P2P_PORT}"
+          image: baas.reg.2.14/library/quorum:2.1.1
+          imagePullPolicy: Always
+          ports:
+            - name: p2p-port
+              containerPort: ${{P2P_PORT}}
+              protocol: TCP
+            - name: rpc-port
+              containerPort: ${{RPC_PORT}}
+              protocol: TCP
+          #livenessProbe:
+          #  tcpSocket:
+          #    port: ${{RPC_PORT}}
+          #  initialDelaySeconds: 60
+          #  periodSeconds: 10
+    triggers:
+    - type: ConfigChange
+
+parameters:
+###################### quorum parameters ############################################
+- name: LAUNCH_GETH_PARAMETERS
+  displayName: launch_parameters
+  description: The parameters for running geth 
+  value: "--nodiscover --syncmode full --mine --minerthreads 1 --rpc --rpcaddr 0.0.0.0 --rpcapi admin,db,eth,debug,miner,net,shh,txpool,personal,web3,quorum"
+- name: NODE_ID
+  displayName: NODE_ID
+  description: NODE_ID should be increased
+  value: "1"
+- name: NETWORK_ID
+  displayName: NETWORK_ID
+  description: NETWORK_ID
+  value: "5"
+- name: RPC_PORT
+  displayName: RPC_PORT
+  description: RPC_PORT should be increased
+  value: "22000"
+- name: P2P_PORT
+  displayName: P2P_PORT
+  description: P2P_PORT should be increased
+  value: "21000"
+
+####################### tessera parameters ##########################################
+- name: LAUNCH_TESSERA_PARAMETERS
+  displayName: launch_parameters
+  description: The parameters for running geth 
+  value: "-jar /tessera/tessera-app.jar"
+- name: MEMORY
+  displayName: tessera memory
+  description: tessera memory
+  value: "-Xms128M -Xmx128M"
+- name: DDIR
+  displayName: DDIR
+  description: tessera and quorum share DDIR
+  value: "/tesserasocket"
+- name: DEBUG 
+  displayName: DEBUG
+  description: DEBUG
+  value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5000 -Xdebug"
+- name: TESSERA_PORT 
+  displayName: TESSERA_PORT
+  description: TESSERA_PORT should be increased
+  value: "9000"

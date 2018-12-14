@@ -1,29 +1,47 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: Template
 metadata:
-  name: initjob
-spec:
-  template:
-    metadata:
-      name: initjob
-    spec:
-      containers:
-      - name: initjob
-        image: baas.reg.2.14/library/initjob:latest
+  name: "quorum-tessera"
+message: "quorum-tessera message"
+objects:
+
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: initjob
+  spec:
+    template:
+      metadata:
+        name: initjob
+      spec:
+        containers:
+        - name: initjob
+          image: baas.reg.2.14/library/initjob:latest
       #command:
       #- "/opt/manageiq/container-scripts/backup_db"
-        securityContext:
-          runAsUser: 0
-        env:
-        - name: nodeNumber
-          value: "3"
-        - name: password
-          value: "abc"
-        volumeMounts:
+          securityContext:
+            runAsUser: 0
+          env:
+          - name: nodeNumber
+            value: "${NODENUMBER}"
+          - name: password
+            value: "${PASSWORD}"
+          volumeMounts:
+          - name: tesserasharestorage
+            mountPath: /shareStorage
+        volumes:
         - name: tesserasharestorage
-          mountPath: /shareStorage
-      volumes:
-      - name: tesserasharestorage
-        persistentVolumeClaim:
-          claimName: tesserasharestoragepvc
-      restartPolicy: Never
+          persistentVolumeClaim:
+            claimName: sharestoragepvc
+        restartPolicy: Never
+
+parameters:
+###################### quorum parameters ############################################
+- name: NODENUMBER
+  displayName: NODENUMBER
+  description: NODENUMBER 
+  value: "3"
+- name: PASSWORD
+  displayName: PASSWORD
+  description: PASSWORD 
+  value: "abc"

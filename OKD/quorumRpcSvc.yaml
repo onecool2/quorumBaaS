@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: quorumrpc
+  labels:
+    name: quorumrpc
+spec:
+  type: NodePort
+  ports:
+    - port: 22000
+      nodePort: 32000
+      name: rpc
+  selector:
+    role: quorum-fullnode
+
+#- apiVersion: v1
+
+#  kind: Service
+#  metadata:
+#    name: "quorum-rpc-service${NODE_ID}"
+#  spec:
+#    ports:
+#    - port: ${{RPC_PORT}}
+#      protocol: TCP
+#      targetPort: ${{RPC_PORT}}
+#      name: rpc-port
+#    selector:
+#      name: quorum-tessera
