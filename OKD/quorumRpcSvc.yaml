@@ -1,28 +1,27 @@
 apiVersion: v1
-kind: Service
+kind: Template
 metadata:
-  name: quorumrpc
-  labels:
+  name: "quorum-fullnode"
+message: "quorum-fullnode"
+objects:
+#################### SVC ############################
+- apiVersion: v1
+  kind: Service
+  metadata:
     name: quorumrpc
-spec:
-  type: NodePort
-  ports:
-    - port: 22000
-      nodePort: 32000
-      name: rpc
-  selector:
-    role: quorum-fullnode
+    labels:
+      name: quorumrpc
+  spec:
+    type: NodePort
+    ports:
+      - port: 22000
+        nodePort: ${{PUB_RPC_PORT}}
+        name: rpc
+    selector:
+      role: quorum-fullnode
 
-#- apiVersion: v1
-
-#  kind: Service
-#  metadata:
-#    name: "quorum-rpc-service${NODE_ID}"
-#  spec:
-#    ports:
-#    - port: ${{RPC_PORT}}
-#      protocol: TCP
-#      targetPort: ${{RPC_PORT}}
-#      name: rpc-port
-#    selector:
-#      name: quorum-tessera
+parameters:
+- name: PUB_RPC_PORT
+  displayName: Public_RPC_PORT
+  description: RPC_PORT should be increased
+  value: "32000"

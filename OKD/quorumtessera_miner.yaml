@@ -91,7 +91,7 @@ objects:
             value: "${TESSERA_PORT}"
           - name: TESSERADIR
             value: "{TESSERADIR}"
-          image: baas.reg.2.14/library/tessera:0.7.3
+          image: reg.newnewchain.com/baas/tessera:latest
           imagePullPolicy: Always
           ports: 
             - name: tessera-port
@@ -121,7 +121,7 @@ objects:
             value: "${RPC_PORT}"
           - name: P2P_PORT
             value: "${P2P_PORT}"
-          image: baas.reg.2.14/library/quorum:2.1.1
+          image: reg.newnewchain.com/baas/quorum:2.1.1
           imagePullPolicy: Always
           ports:
             - name: p2p-port

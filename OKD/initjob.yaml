@@ -16,7 +16,7 @@ objects:
       spec:
         containers:
         - name: initjob
-          image: baas.reg.2.14/library/initjob:latest
+          image: reg.newnewchain.com/baas/initjob:latest
       #command:
       #- "/opt/manageiq/container-scripts/backup_db"
           securityContext:

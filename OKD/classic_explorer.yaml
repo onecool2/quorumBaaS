@@ -51,11 +51,11 @@ objects:
           name: classic-explorer
       spec:
         containers:
-########################### tessera  pod #######################################
+########################### explorer container #######################################
         - name: classic-explorer
           securityContext:
             runAsUser: 0
-          image: baas.reg.2.14/library/classic-explorer
+          image: reg.newnewchain.com/baas/classic-explorer
           imagePullPolicy: Always
           ports: 
             - name: explorer-port
@@ -65,11 +65,11 @@ objects:
       #        port: tessera-port
       #      initialDelaySeconds: 60
       #      periodSeconds: 10
-########################## quorum pod #######################################
+########################## mongodb container #######################################
         - name: mongodb
           securityContext:
             runAsUser: 0
-          image: baas.reg.2.14/library/mongo
+          image: reg.newnewchain.com/baas/mongo
           imagePullPolicy: Always
           ports:
             - name: mongo-port

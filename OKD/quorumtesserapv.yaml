@@ -17,7 +17,7 @@ objects:
     persistentVolumeReclaimPolicy: Retain 
     nfs: 
       path: "/nfs/share/${PROJECTNAME}"
-      server: centos7-2-15 
+      server: harbor-001-pre
       readOnly: false
    
 - apiVersion: "v1"
@@ -36,5 +36,5 @@ parameters:
 - name: PROJECTNAME
   displayName: project name
   description: project name 
-  value: "test1"
+  value: "test2"
 
