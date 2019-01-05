@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: "classic-explorer"
+message: "ethereumclassic explorer"
+objects:
+
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: explorer
+  spec:
+    host: www.explorer.com
+    path: "/" 
+    to:
+      kind: Service
+      name: classic-explorer
+
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: "classic-explorer"
+  spec:
+    ports:
+    - port: 3000
+      protocol: TCP
+      targetPort: 3000
+      name: exporer-port
+    selector:
+      name: classic-explorer
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: "classic-explorer"
+  spec:
+    replicas: 1
+    selector:
+      name: classic-explorer
+    strategy:
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: classic-explorer
+      spec:
+        containers:
+########################### explorer container #######################################
+        - name: classic-explorer
+          securityContext:
+            runAsUser: 0
+          image: reg.newnewchain.com/baas/classic-explorer
+          imagePullPolicy: Always
+          ports: 
+            - name: explorer-port
+              containerPort: 3000
+      #    livenessProbe:
+      #      tcpSocket:
+      #        port: tessera-port
+      #      initialDelaySeconds: 60
+      #      periodSeconds: 10
+########################## mongodb container #######################################
+        - name: mongodb
+          securityContext:
+            runAsUser: 0
+          image: reg.newnewchain.com/baas/mongo
+          imagePullPolicy: Always
+          ports:
+            - name: mongo-port
+              containerPort: 27017
+              protocol: TCP
+          #livenessProbe:
+          #  tcpSocket:
+          #    port: ${{RPC_PORT}}
+          #  initialDelaySeconds: 60
+          #  periodSeconds: 10
+    triggers:
+    - type: ConfigChange

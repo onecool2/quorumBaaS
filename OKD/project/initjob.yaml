@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: "quorum-tessera"
+message: "quorum-tessera message"
+objects:
+
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: initjob
+  spec:
+    template:
+      metadata:
+        name: initjob
+      spec:
+        containers:
+        - name: initjob
+          image: reg.newnewchain.com/baas/initjob:latest
+      #command:
+      #- "/opt/manageiq/container-scripts/backup_db"
+          securityContext:
+            runAsUser: 0
+          env:
+          - name: nodeNumber
+            value: "${NODENUMBER}"
+          - name: password
+            value: "${PASSWORD}"
+          volumeMounts:
+          - name: tesserasharestorage
+            mountPath: /shareStorage
+        volumes:
+        - name: tesserasharestorage
+          persistentVolumeClaim:
+            claimName: sharestoragepvc
+        restartPolicy: Never
+
+parameters:
+###################### quorum parameters ############################################
+- name: NODENUMBER
+  displayName: NODENUMBER
+  description: NODENUMBER 
+  value: "3"
+- name: PASSWORD
+  displayName: PASSWORD
+  description: PASSWORD 
+  value: "abc"
